@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:5000"
+    environment:
+      - FLASK_ENV=staging
+      - FLASK_DEBUG=1
+      - DB_HOST=db  # Nome do serviço, não IP
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=fakeshop_staging
+      - DB_PORT=5432
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=fakeshop_staging
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
+volumes:
+  postgres_staging_data:

@@ -1,10 +1,23 @@
-FROM python:3.11.0
-EXPOSE 5000
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+FROM python:3.11-slim
+
 WORKDIR /app
-COPY . /app
-RUN chmod +x /app/entrypoint.sh
-ENV PROMETHEUS_MULTIPROC_DIR=/tmp/metrics
-RUN mkdir -p /tmp/metrics 
-CMD ["/app/entrypoint.sh"]
+
+# Instalar dependências do sistema necessárias
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar e instalar dependências Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código da aplicação
+COPY . .
+
+# Criar usuário não-root
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]

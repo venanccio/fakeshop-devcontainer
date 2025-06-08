@@ -1,0 +1,30 @@
+services:
+  app:
+    ports:
+      - "8080:5000"  # Produção na porta 8080
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=fakeshop_prod
+      - DB_PORT=5432
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  db:
+    environment:
+      - POSTGRES_DB=fakeshop_prod
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    restart: always
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_prod_data:

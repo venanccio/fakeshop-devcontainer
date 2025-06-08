@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile.dev
+    volumes:
+      - ..:/workspace:cached
+      - vscode-extensions:/home/vscode/.vscode-server/extensions
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - DATABASE_URL=postgresql://postgres:password@db:5432/fakeshop_dev
+    command: sleep infinity
+    ports:
+      - "8081:5000"  # Staging na porta 8081
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=fakeshop_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+volumes:
+  vscode-extensions:
+  postgres_dev_data:
