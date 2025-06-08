@@ -1,113 +1,316 @@
-# Fake Shop
+# Fake Shop - DevContainer Implementation
 
-## Descrição
-Fake Shop é uma aplicação de e-commerce desenvolvida em Python usando Flask, com suporte a PostgreSQL como banco de dados.
+Este projeto implementa um ambiente de desenvolvimento completo usando **DevContainers** para o Fake Shop, uma aplicação Flask com PostgreSQL. A implementação garante consistência entre ambientes de desenvolvimento, staging e produção.
 
-## Ambientes
+## 🚀 Visão Geral
 
-O projeto suporta dois ambientes:
+O Fake Shop utiliza DevContainers para criar um ambiente de desenvolvimento isolado e reproduzível, eliminando problemas de configuração manual e garantindo que todos os desenvolvedores trabalhem no mesmo ambiente.
 
-### Produção (Porta 8080)
-- Usa Gunicorn como servidor web
-- Configurado para ambiente de produção
-- Acessível em http://localhost:8080
+### Tecnologias Utilizadas
 
-### Staging/Desenvolvimento (Porta 8081)
-- Usa o servidor de desenvolvimento do Flask
-- Modo debug ativado
-- Hot-reload para desenvolvimento
-- Acessível em http://localhost:8081
+- **Python 3.11** com Flask
+- **PostgreSQL 15** como banco de dados
+- **Docker** e **Docker Compose** para containerização
+- **DevContainers** para ambiente de desenvolvimento
+- **Gunicorn** como servidor WSGI
+- **Alembic** para migrations de banco de dados
 
-## Requisitos
-- Docker
-- Docker Compose
+## 📁 Estrutura do Projeto
 
-## Configuração
+fake-shop/
+├── .devcontainer/
+│ ├── devcontainer.json # Configuração do DevContainer
+│ ├── Dockerfile.dev # Dockerfile para desenvolvimento
+│ └── docker-compose.override.yml # Override para DevContainer
+├── src/
+│ ├── app.py # Aplicação Flask principal
+│ ├── models/ # Modelos do banco de dados
+│ ├── templates/ # Templates HTML
+│ └── static/ # Arquivos estáticos
+├── compose.yml # Docker Compose base
+├── compose.staging.yml # Configuração para staging
+├── compose.production.yml # Configuração para produção
+├── Dockerfile # Dockerfile de produção
+├── start.sh # Script de inicialização
+├── requirements.txt # Dependências Python
+└── README.md # Este arquivo
 
-### Variáveis de Ambiente
-- `DB_HOST` => Host do banco de dados PostgreSQL
-- `DB_USER` => Nome do usuário do banco de dados PostgreSQL
-- `DB_PASSWORD` => Senha do usuário do banco de dados PostgreSQL
-- `DB_NAME` => Nome do banco de dados PostgreSQL
-- `DB_PORT` => Porta de conexão com o banco de dados PostgreSQL
-- `FLASK_APP` => Arquivo de inicialização do Flask (app.py)
-- `FLASK_ENV` => Ambiente de execução (production/development)
 
-## Execução
+## 🛠 Configuração dos Ambientes
+
+### Ambiente de Desenvolvimento (DevContainer)
+
+O DevContainer está configurado para fornecer um ambiente completo de desenvolvimento:
+
+- **Extensões VS Code**: Python, Docker, REST Client, Black formatter
+- **Ferramentas de desenvolvimento**: pytest, black, flake8
+- **Hot reload**: Código sincronizado com volume
+- **Debug habilitado**: Flask em modo debug
+
+### Ambiente de Staging (Porta 8081)
+
+- **Finalidade**: Testes de integração e validação
+- **Configuração**: Similar à produção, mas com debug habilitado
+- **Banco**: PostgreSQL isolado (`fakeshop_staging`)
+- **Workers**: 1 worker Gunicorn para facilitar debug
+
+### Ambiente de Produção (Porta 8080)
+
+- **Finalidade**: Ambiente otimizado para performance
+- **Configuração**: Multi-stage build otimizado
+- **Banco**: PostgreSQL isolado (`fakeshop_prod`)
+- **Workers**: 4 workers Gunicorn para alta performance
+- **Segurança**: Usuário não-root, health checks
+
+## 🚀 Como Usar
+
+### Pré-requisitos
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [Extensão Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+### Desenvolvimento com DevContainer
+
+1. **Clone o repositório**:
+git clone <url-do-repositorio>
+cd fake-shop
+
+
+2. **Abra no VS Code**:
+code .
+
+
+3. **Reabra no Container**:
+- Pressione `Ctrl+Shift+P` (ou `Cmd+Shift+P` no Mac)
+- Digite "Dev Containers: Reopen in Container"
+- Aguarde a construção do ambiente
+
+4. **Acesse a aplicação**:
+- A aplicação estará disponível em `http://localhost:5000`
+- O VS Code automaticamente encaminhará a porta
+
+### Ambiente de Staging
+
+Subir ambiente de staging
+docker compose -f compose.yml -f compose.staging.yml up -d
+
+Verificar logs
+docker logs fakeshop-devcontainer-app-1 --follow
+
+Acessar aplicação
+curl http://localhost:8081
+
 
 ### Ambiente de Produção
-Para iniciar apenas o ambiente de produção:
-```bash
-docker compose up --build
-```
 
-### Ambiente de Staging/Desenvolvimento
-Para iniciar apenas o ambiente de staging:
-```bash
-docker compose -f compose.yml -f .devcontainer/docker-compose.override.yml up --build
-```
+Subir ambiente de produção
+docker compose -f compose.yml -f compose.production.yml up -d
 
-### Ambos os Ambientes
-Para iniciar ambos os ambientes simultaneamente:
-```bash
-# Primeiro, inicie o ambiente de produção
-docker compose up -d
+Verificar status
+docker compose -f compose.yml -f compose.production.yml ps
 
-# Em outro terminal, inicie o ambiente de staging
-docker compose -f compose.yml -f .devcontainer/docker-compose.override.yml up --build
-```
+Acessar aplicação
+curl http://localhost:8080
 
-## Estrutura do Projeto
-```
-.
-├── src/
-│   ├── app.py              # Arquivo principal da aplicação
-│   ├── models/             # Modelos do banco de dados
-│   ├── static/             # Arquivos estáticos (CSS, JS, imagens)
-│   ├── templates/          # Templates HTML
-│   └── migrations/         # Migrações do banco de dados
-├── compose.yml             # Configuração do ambiente de produção
-├── .devcontainer/
-│   ├── docker-compose.override.yml  # Configuração do ambiente de staging
-│   └── Dockerfile.dev      # Dockerfile para desenvolvimento
-└── Dockerfile              # Dockerfile para produção
-```
 
-## Comandos Úteis
+## 🔧 Scripts de Gerenciamento
 
-### Limpar Containers e Imagens
-```bash
-# Parar e remover containers
-docker compose down
+### Script de Gerenciamento Automático
 
-# Remover todas as imagens não utilizadas
-docker image prune -a
-```
+Crie um arquivo `manage-envs.sh` para facilitar o gerenciamento:
 
-### Verificar Logs
-```bash
-# Logs do ambiente de produção
-docker compose logs -f
+#!/bin/bash
 
-# Logs do ambiente de staging
-docker compose -f compose.yml -f .devcontainer/docker-compose.override.yml logs -f
-```
+case "$1" in
+start-staging)
+docker compose -f compose.yml -f compose.staging.yml up -d
+echo "✅ Staging iniciado em http://localhost:8081"
+;;
+start-production)
+docker compose -f compose.yml -f compose.production.yml up -d
+echo "✅ Produção iniciada em http://localhost:8080"
+;;
+stop-staging)
+docker compose -f compose.yml -f compose.staging.yml down
+echo "🛑 Staging parado"
+;;
+stop-production)
+docker compose -f compose.yml -f compose.production.yml down
+echo "🛑 Produção parada"
+;;
+status)
+echo "=== STATUS DOS AMBIENTES ==="
+docker ps | grep -E "(staging|production|devcontainer)"
+;;
+logs-staging)
+docker logs fakeshop-devcontainer-app-1 --follow
+;;
+logs-production)
+docker logs fakeshop-devcontainer-app-1 --follow
+;;
+*)
+echo "Uso: $0 {start-staging|start-production|stop-staging|stop-production|status|logs-staging|logs-production}"
+exit 1
+;;
+esac
 
-### Acessar o Banco de Dados
-```bash
-# Conectar ao container do banco de dados
-docker compose exec db psql -U postgres
-```
 
-## Desenvolvimento
+Tornar executável:
+chmod +x manage-envs.sh
 
-### Hot Reload
-O ambiente de staging (porta 8081) suporta hot reload, então as alterações nos arquivos são refletidas automaticamente.
 
-### Volumes
-O ambiente de staging monta o código fonte como um volume, permitindo edições em tempo real sem necessidade de reconstruir a imagem.
+## 🗃 Gerenciamento de Banco de Dados
 
-## Banco de Dados
-- PostgreSQL 15
-- Dados persistentes armazenados em volume Docker
-- Migrações automáticas na inicialização
+### Migrations
+
+As migrations são aplicadas automaticamente na inicialização dos containers através do script `start.sh`:
+
+Aplicar migrations manualmente (se necessário)
+docker exec -it <container-name> python3 -c "from app import app, apply_migrations; apply_migrations()"
+
+
+### Backup e Restore
+
+Backup do banco de produção
+docker exec fakeshop-devcontainer-db-1 pg_dump -U postgres fakeshop_prod > backup_prod_$(date +%Y%m%d).sql
+
+Backup do banco de staging
+docker exec fakeshop-devcontainer-db-1 pg_dump -U postgres fakeshop_staging > backup_staging_$(date +%Y%m%d).sql
+
+Restore (exemplo)
+docker exec -i fakeshop-devcontainer-db-1 psql -U postgres -d fakeshop_staging < backup_staging_20250608.sql
+
+
+## 🔍 Monitoramento e Logs
+
+### Verificar Status dos Containers
+
+Listar todos os containers
+docker ps
+
+Verificar redes Docker
+docker network ls
+
+Inspecionar container específico
+docker inspect <container-name>
+
+
+### Logs Detalhados
+
+Logs em tempo real
+docker logs <container-name> --follow
+
+Logs das últimas 50 linhas
+docker logs <container-name> --tail 50
+
+Logs com timestamp
+docker logs <container-name> --timestamps
+
+
+### Health Checks
+
+Os containers de produção incluem health checks automáticos:
+
+Verificar health status
+docker inspect <container-name> | grep Health -A 10
+
+
+## 🔒 Segurança
+
+### Boas Práticas Implementadas
+
+- **Usuário não-root**: Containers executam como `appuser` (UID 1000)
+- **Redes isoladas**: Cada ambiente tem sua própria rede Docker
+- **Secrets management**: Variáveis de ambiente para configurações sensíveis
+- **Multi-stage builds**: Imagens de produção otimizadas e seguras
+- **Health checks**: Monitoramento automático da saúde dos containers
+
+### Variáveis de Ambiente
+
+Crie arquivos `.env` para cada ambiente (não commitados no git):
+
+**.env.staging**:
+FLASK_ENV=staging
+FLASK_DEBUG=1
+DB_HOST=db
+DB_USER=postgres
+DB_PASSWORD=your-staging-password
+DB_NAME=fakeshop_staging
+
+
+**.env.production**:
+FLASK_ENV=production
+FLASK_DEBUG=0
+DB_HOST=db
+DB_USER=postgres
+DB_PASSWORD=your-production-password
+DB_NAME=fakeshop_prod
+SECRET_KEY=your-super-secret-production-key
+
+
+## 🚨 Troubleshooting
+
+### Problemas Comuns
+
+**Container não inicia**:
+Verificar logs de erro
+docker logs <container-name>
+
+Rebuild forçado
+docker compose up --build --force-recreate
+
+
+**Erro de conexão com banco**:
+Verificar se o banco está rodando
+docker ps | grep postgres
+
+Testar conectividade
+docker exec -it <app-container> python3 -c "import psycopg; print('OK')"
+
+
+**Migrations não aplicadas**:
+Aplicar migrations manualmente
+docker exec -it <app-container> /bin/bash
+cd /app/src
+python3 -c "from app import app, apply_migrations; apply_migrations()"
+
+
+**Conflitos de porta**:
+Verificar portas em uso
+netstat -tulpn | grep -E "(8080|8081|5432)"
+
+Parar containers conflitantes
+docker stop $(docker ps -q)
+
+
+## 📊 Resumo dos Ambientes
+
+| Ambiente | Porta | Banco | Debug | Workers | Health Check |
+|----------|-------|-------|-------|---------|--------------|
+| **DevContainer** | 5000 | Automático | ✅ | 1 | ❌ |
+| **Staging** | 8081 | fakeshop_staging | ✅ | 1 | ✅ |
+| **Produção** | 8080 | fakeshop_prod | ❌ | 4 | ✅ |
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 🙏 Agradecimentos
+
+- Equipe da Rota42 pelo desafio
+- Comunidade DevContainers pela especificação
+- Documentação oficial do Docker e Docker Compose
+
+---
+
+**Desenvolvido com ❤️ usando DevContainers**
