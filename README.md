@@ -314,3 +314,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 **Desenvolvido com ❤️ usando DevContainers**
+
+Ambiente de Produção e Staging Rodando
+![prod-stag](https://github.com/user-attachments/assets/a367dd55-0ffc-4ebb-bc6d-3e485b5ab4b3)
+
